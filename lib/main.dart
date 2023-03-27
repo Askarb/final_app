@@ -75,6 +75,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: TextStyle(color: textColor),
                   );
                 }
+                if (state is WeatherError) {
+                  return Text(
+                    state.message,
+                    style: TextStyle(color: textColor),
+                  );
+                }
 
                 return Text(
                   "Тут будет погода",
@@ -82,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
               buildWhen: (prev, curr) {
-                return curr is WeatherChanged;
+                return curr is WeatherChanged || curr is WeatherError;
               },
             ),
             Text(

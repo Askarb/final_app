@@ -36,9 +36,14 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       emit(ThemeChanged(_isDarkMode));
     });
     on<UpdateWeather>((event, emit) async {
-      final position = await _determinePosition();
-      model = await repository.getWeather(position.latitude, position.longitude);
-      emit(WeatherChanged(model!));
+      try {
+        final position = await _determinePosition();
+
+        model = await repository.getWeather(position.latitude, position.longitude);
+        emit(WeatherChanged(model!));
+      } catch (e) {
+        emit(WeatherError('Weather error'));
+      }
     });
   }
 

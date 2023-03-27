@@ -17,6 +17,12 @@ class WeatherChanged extends AppState {
   WeatherChanged(this.model);
 }
 
+class WeatherError extends AppState {
+  final String message;
+
+  WeatherError(this.message);
+}
+
 class ThemeChanged extends AppState {
   final bool isDarkMode;
 
