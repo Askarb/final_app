@@ -46,7 +46,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Widget? weather;
+  _increment() {
+    BlocProvider.of<AppBloc>(context).add(IncrementEvent());
+  }
+
+  _decrement() {
+    BlocProvider.of<AppBloc>(context).add(DecrementEvent());
+  }
+
   Color bgColor = Colors.white;
   Color textColor = Colors.black;
   @override
@@ -62,55 +69,69 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             BlocBuilder<AppBloc, AppState>(
               builder: (context, state) {
-                if (state is WeatherChanged || state is ThemeChanged) {
-                  final model = BlocProvider.of<AppBloc>(context).model;
-                  if (model != null) {
-                    weather = Text(
-                      "${model.name}: ${model.main?.temp}",
-                      style: TextStyle(color: textColor),
-                    );
-                  }
+                if (state is WeatherChanged) {
+                  return Text(
+                    "${state.model.name}: ${state.model.main?.temp}",
+                    style: TextStyle(color: textColor),
+                  );
                 }
 
-                return weather ??
-                    Text(
-                      "Тут будет погода",
-                      style: TextStyle(color: textColor),
-                    );
+                return Text(
+                  "Тут будет погода",
+                  style: TextStyle(color: textColor),
+                );
+              },
+              buildWhen: (prev, curr) {
+                return curr is WeatherChanged;
               },
             ),
             Text(
               'You have pushed the button this many times:',
               style: TextStyle(color: textColor),
             ),
-            BlocBuilder<AppBloc, AppState>(builder: (context, state) {
-              return Text(
-                '${BlocProvider.of<AppBloc>(context).counter}',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: textColor),
-              );
-            }),
             BlocBuilder<AppBloc, AppState>(
               builder: (context, state) {
-                return ElevatedButton(
-                  onPressed: BlocProvider.of<AppBloc>(context).counter >= 10
-                      ? null
-                      : () {
-                          BlocProvider.of<AppBloc>(context).add(IncrementEvent());
-                        },
-                  child: const Text("+"),
+                int counter = 0;
+                if (state is CounterChanged) {
+                  counter = state.counter;
+                }
+                return Text(
+                  '$counter',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: textColor),
                 );
+              },
+              buildWhen: (prev, curr) {
+                return curr is CounterChanged;
               },
             ),
             BlocBuilder<AppBloc, AppState>(
               builder: (context, state) {
+                Function()? f = _increment;
+                if (state is CounterChanged) {
+                  f = state.counter >= 10 ? null : _increment;
+                }
                 return ElevatedButton(
-                  onPressed: BlocProvider.of<AppBloc>(context).counter <= 0
-                      ? null
-                      : () {
-                          BlocProvider.of<AppBloc>(context).add(DecrementEvent());
-                        },
+                  onPressed: f,
+                  child: const Text("+"),
+                );
+              },
+              buildWhen: (prev, curr) {
+                return curr is CounterChanged;
+              },
+            ),
+            BlocBuilder<AppBloc, AppState>(
+              builder: (context, state) {
+                Function()? f;
+                if (state is CounterChanged) {
+                  f = state.counter == 0 ? null : _decrement;
+                }
+                return ElevatedButton(
+                  onPressed: f,
                   child: const Text("-"),
                 );
+              },
+              buildWhen: (prev, curr) {
+                return curr is CounterChanged;
               },
             ),
             ElevatedButton(
